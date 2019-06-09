@@ -32,6 +32,9 @@ class ProductController extends Controller
         //
         $products = Product::all();
         $product_types = ProductType::all();
+        // var_dump($products);
+        // var_dump($product_types);
+        // die();
         return view('Product.create',['product_types' => $product_types],['products' =>$products]);
     }
 
@@ -63,13 +66,21 @@ class ProductController extends Controller
         $products->image = $request->image;
         $products->unit = $request->unit;
         $products->new = $request->new;
+
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $name = time().'.'.$image->getClientOriginalExtension();
-            $destinationPath = public_path('/source/image/product');
-            $image->move('source/image/product','file.jpg');
+
+            $file = $request->file('image');
+            $name = $file->getClientOriginalName();
+            $image = str_random(4)."_".$name;
+            while(file_exists("source/image/product/".$image))
+            {
+                $image = str_random(4)."_".$name;
+            }
+            $file->move("source/image/product/",$image);
+            $products->image = $image;
        }
         $products->save();
+
     //     $products = Product::create([
     //     'name' => $request->name,
     //     'id_type' => $request->id_type,
@@ -80,7 +91,9 @@ class ProductController extends Controller
     //     'unit' => $request->unit,
     //     'new' => $request->new,
     //    ]);
-     $products->product_type()->attach($request->product_type);
+        // var_dump($products->product_type());die();
+     // $products->product_type()->attach($request->product_type);
+
        return redirect()->route('products.index');
     }
 
